@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-pt" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churrasquinho Vaidoso | Take-Away & Churrasqueira</title>
+    
+    <!-- Bibliotecas Externas -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="logo-removebg-preview.png" type="image/x-icon">
+    <!-- 
+      ARQUIVO SEPARADO SUGERIDO: /assets/css/main.css 
+    -->
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .hero-gradient {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url('img1.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .menu-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .category-pill.active {
+            background-color: #ea580c;
+            color: white;
+        }
+
+        .cart-badge {
+            font-size: 0.65rem;
+            top: -5px;
+            right: -5px;
+        }
+
+        /* Animações */
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .cart-sidebar {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .hidden-item { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <!-- Header / Nav -->
+    <header class="glass-effect sticky top-0 z-40 border-b border-slate-200">
+        <div class="container mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="img.jpg" alt="Logo" class="w-12 h-12 rounded-full object-cover border-2 border-orange-500">
+                <div class="hidden sm:block">
+                    <h1 class="font-extrabold text-red-700 leading-none">CHURRASQUINHO</h1>
+                    <p class="text-orange-500 font-bold italic text-sm">Vaidoso</p>
+                </div>
+            </div>
+
+            <!-- Pesquisa Central -->
+            <div class="flex-1 max-w-md mx-8 hidden lg:block">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="mainSearch" placeholder="O que vai querer hoje?" 
+                        class="w-full pl-11 pr-4 py-2 bg-slate-100 border-none rounded-full focus:ring-2 focus:ring-orange-500 transition-all">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 sm:gap-6">
+                <!-- Status da Loja -->
+                <div id="shopStatus" class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span id="statusText">ABERTO</span>
+                </div>
+
+                <!-- Botão Carrinho -->
+                <button onclick="toggleCart()" class="relative p-3 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-colors shadow-sm">
+                    <i class="fas fa-shopping-basket text-slate-700"></i>
+                    <span id="cartCount" class="cart-badge absolute bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero-gradient h-[450px] flex items-center justify-center text-white text-center px-4">
+        <div class="max-w-3xl space-y-6">
+            <span class="bg-orange-600 px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase">Especialista em Unhos</span>
+            <h2 class="text-4xl md:text-6xl font-extrabold drop-shadow-lg">Frango Assado na Brasa & Grelhados</h2>
+            <div class="flex flex-wrap justify-center gap-4 text-sm font-semibold">
+                <span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-400"></i> Carne Fresca</span>
+                <span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-400"></i> Tempero Caseiro</span>
+                <span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-400"></i> Take-Away Rápido</span>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 py-12">
+        
+        <!-- Filtros e Busca Mobile -->
+        <div class="mb-12 space-y-6">
+            <div class="lg:hidden">
+                <input type="text" id="mobileSearch" placeholder="Pesquisar pratos..." 
+                    class="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-orange-500 outline-none">
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3" id="categoryFilters">
+                <button class="category-pill active px-6 py-2 rounded-full border border-slate-200 bg-white font-bold text-sm shadow-sm hover:border-orange-500 transition-all" data-category="all">Todos</button>
+                <button class="category-pill px-6 py-2 rounded-full border border-slate-200 bg-white font-bold text-sm shadow-sm hover:border-orange-500 transition-all" data-category="frango">Frangos</button>
+                <button class="category-pill px-6 py-2 rounded-full border border-slate-200 bg-white font-bold text-sm shadow-sm hover:border-orange-500 transition-all" data-category="grelhados">Grelhados</button>
+                <button class="category-pill px-6 py-2 rounded-full border border-slate-200 bg-white font-bold text-sm shadow-sm hover:border-orange-500 transition-all" data-category="acompanhamento">Acompanhamentos</button>
+            </div>
+        </div>
+
+        <!-- Grid de Menu -->
+        <div id="menuContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            
+            <!-- Item 1 -->
+            <div class="menu-card bg-white rounded-3xl overflow-hidden border border-slate-100 flex flex-col h-full" data-category="frango" data-name="frango assado inteiro">
+                <div class="relative h-56 group overflow-hidden">
+                    <img src="img1.jpg" alt="Frango Assado" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute top-4 left-4 bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">Popular</div>
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Frango Assado Inteiro</h3>
+                    <p class="text-slate-500 text-sm mb-6 flex-1 italic">Grelhado lentamente na brasa com o nosso molho secreto de limão e ervas.</p>
+                    <div class="flex items-center justify-between mt-auto">
+                        <span class="text-2xl font-black text-orange-600">10.50€</span>
+                        <button onclick="addToCart('Frango Assado Inteiro', 10.50)" class="bg-slate-900 text-white p-3 rounded-2xl hover:bg-orange-600 transition-colors">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="menu-card bg-white rounded-3xl overflow-hidden border border-slate-100 flex flex-col h-full" data-category="acompanhamento" data-name="arroz de manteiga divinal">
+                <div class="relative h-56">
+                    <img src="img2.jpg" alt="Arroz" class="w-full h-full object-cover">
+                    <div class="absolute top-4 left-4 bg-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase text-center">Caseiro</div>
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Arroz de Manteiga</h3>
+                    <p class="text-slate-500 text-sm mb-6 flex-1">O famoso arroz "soltinho" que toda a freguesia adora.</p>
+                    <div class="flex items-center justify-between mt-auto">
+                        <span class="text-2xl font-black text-orange-600">2.50€</span>
+                        <button onclick="addToCart('Arroz de Manteiga', 2.50)" class="bg-slate-900 text-white p-3 rounded-2xl hover:bg-orange-600 transition-colors">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="menu-card bg-white rounded-3xl overflow-hidden border border-slate-100 flex flex-col h-full" data-category="grelhados" data-name="misto de grelhados carnes">
+                <div class="relative h-56">
+                    <img src="img3.jpg" alt="Grelhados" class="w-full h-full object-cover">
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Misto de Grelhados</h3>
+                    <p class="text-slate-500 text-sm mb-6 flex-1">Seleção de carnes (Entrecosto, Costeletas e Salsicha) grelhadas na hora.</p>
+                    <div class="flex items-center justify-between mt-auto">
+                        <span class="text-2xl font-black text-orange-600">14.00€</span>
+                        <button onclick="addToCart('Misto de Grelhados', 14.00)" class="bg-slate-900 text-white p-3 rounded-2xl hover:bg-orange-600 transition-colors">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="menu-card bg-white rounded-3xl overflow-hidden border border-slate-100 flex flex-col h-full" data-category="acompanhamento" data-name="batata frita palito">
+                <div class="relative h-56">
+                    <img src="img5.png.png" alt="Batata Frita" class="w-full h-full object-cover">
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Batata Frita Estaladiça</h3>
+                    <p class="text-slate-500 text-sm mb-6 flex-1">Batatas cortadas à mão, fritas em óleo limpo para máxima crocância.</p>
+                    <div class="flex items-center justify-between mt-auto">
+                        <span class="text-2xl font-black text-orange-600">3.00€</span>
+                        <button onclick="addToCart('Batata Frita', 3.00)" class="bg-slate-900 text-white p-3 rounded-2xl hover:bg-orange-600 transition-colors">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Sobre & Info Secundária -->
+    <section class="py-20 bg-slate-900 text-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="space-y-8">
+                    <h2 class="text-4xl font-black italic">A tradição da brasa <br><span class="text-orange-500">em cada pedido.</span></h2>
+                    <p class="text-slate-400 leading-relaxed text-lg">
+                        Fundada em Unhos, a nossa churrasqueira foca-se na qualidade do produto e na rapidez do serviço de Take-Away. Venha visitar-nos e sinta o aroma dos nossos grelhados.
+                    </p>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="p-6 bg-white/5 rounded-3xl border border-white/10">
+                            <i class="fas fa-star text-orange-500 mb-4 block text-2xl"></i>
+                            <p class="text-sm font-bold uppercase tracking-tighter">Classificação</p>
+                            <p class="text-2xl font-black">4.2/5.0</p>
+                        </div>
+                        <div class="p-6 bg-white/5 rounded-3xl border border-white/10">
+                            <i class="fas fa-map-marked-alt text-orange-500 mb-4 block text-2xl"></i>
+                            <p class="text-sm font-bold uppercase tracking-tighter">Morada</p>
+                            <p class="text-lg font-bold">Av. Forças Armadas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="rounded-[2rem] overflow-hidden border-8 border-white/5 shadow-2xl h-[500px]">
+                    <img src="img.jpg" alt="Loja" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sidebar Carrinho (Oculta por padrão) -->
+    <div id="cartSidebar" class="fixed inset-0 z-50 pointer-events-none">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm opacity-0 transition-opacity pointer-events-none" id="cartOverlay" onclick="toggleCart()"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl pointer-events-auto transform translate-x-full transition-transform cart-sidebar flex flex-col">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-xl font-black">O Meu Pedido</h3>
+                <button onclick="toggleCart()" class="text-slate-400 hover:text-slate-900"><i class="fas fa-times text-2xl"></i></button>
+            </div>
+            
+            <div id="cartItems" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <!-- Itens serão injetados pelo JS -->
+                <p class="text-center text-slate-400 py-10 italic">O carrinho está vazio...</p>
+            </div>
+
+            <div class="p-6 bg-slate-50 border-t border-slate-200">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-slate-500 font-bold uppercase text-xs">Total Estimado</span>
+                    <span id="cartTotal" class="text-3xl font-black text-slate-900">0.00€</span>
+                </div>
+                <button onclick="checkout()" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-orange-200 hover:bg-orange-700 active:scale-95 transition-all">
+                    CONCLUIR PEDIDO VIA WHATSAPP
+                </button>
+                <p class="text-[10px] text-center text-slate-400 mt-4 font-bold uppercase">Nota: O valor final pode variar no balcão.</p>
+            </div>
+        </div>
+    </div>
+
+
+
+     <section id="page-support" class="page-section py-20 bg-slate-100/50">
+            <div class="container mx-auto px-4 max-w-3xl">
+                <h2 class="text-4xl font-black mb-12 text-center text-slate-900 uppercase italic">Suporte ao Cliente</h2>
+                
+                <div class="space-y-4">
+                    <!-- FAQ 1 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200">
+                        <h3 class="font-bold text-lg mb-2 text-slate-800">Fazem entregas em casa?</h3>
+                        <p class="text-slate-600">Atualmente operamos principalmente em sistema de Take-Away (recolha na loja). Ligue-nos para saber se há disponibilidade de entrega para pedidos grandes na zona de Unhos.</p>
+                    </div>
+                    <!-- FAQ 2 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200">
+                        <h3 class="font-bold text-lg mb-2 text-slate-800">Quais são as formas de pagamento?</h3>
+                        <p class="text-slate-600">Aceitamos numerário, Multibanco e MBWay no balcão.</p>
+                    </div>
+                    <!-- FAQ 3 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200">
+                        <h3 class="font-bold text-lg mb-2 text-slate-800">Como posso cancelar um pedido?</h3>
+                        <p class="text-slate-600">Se fez o pedido via WhatsApp e precisa cancelar, por favor ligue imediatamente para o número 219 400 177.</p>
+                    </div>
+                </div>
+
+                <div class="mt-16 bg-orange-600 text-white p-10 rounded-[2.5rem] text-center shadow-xl">
+                    <h3 class="text-2xl font-black mb-4 uppercase">Ainda precisa de ajuda?</h3>
+                    <p class="mb-8 opacity-90 font-medium">A nossa equipa está pronta para ajudar via WhatsApp ou Telefone.</p>
+                    <a href="tel:219400177" class="inline-flex items-center gap-2 bg-white text-orange-600 px-8 py-3 rounded-full font-black uppercase hover:bg-slate-100 transition-all">
+                        <i class="fas fa-headset"></i> Ligar agora
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t border-slate-100 py-12">
+        <div class="container mx-auto px-4 text-center">
+            <img src="img.jpg" class="w-16 h-16 rounded-full mx-auto mb-6 object-cover grayscale opacity-30">
+            <p class="text-slate-400 text-sm font-medium">Unhos, Lisboa, Portugal</p>
+            <p class="text-slate-300 text-xs mt-2 uppercase font-bold tracking-widest">&copy; 2024 Churrasquinho Vaidoso</p>
+        </div>
+    </footer>
+
+    <!-- 
+      ARQUIVO SEPARADO SUGERIDO: /assets/js/main.js 
+    -->
+    <script>
+        // 1. Estado da Aplicação
+        let cart = [];
+        const menuItems = document.querySelectorAll('.menu-card');
+
+        // 2. Lógica do Carrinho
+        function addToCart(name, price) {
+            const existing = cart.find(item => item.name === name);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ name, price, qty: 1 });
+            }
+            updateCartUI();
+            
+            // Pequeno feedback visual no botão de carrinho
+            const badge = document.getElementById('cartCount');
+            badge.classList.add('animate-bounce');
+            setTimeout(() => badge.classList.remove('animate-bounce'), 1000);
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cartItems');
+            const totalDisplay = document.getElementById('cartTotal');
+            const countDisplay = document.getElementById('cartCount');
+            
+            if (cart.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 py-10 italic">O carrinho está vazio...</p>`;
+                totalDisplay.innerText = `0.00€`;
+                countDisplay.innerText = 0;
+                return;
+            }
+
+            let total = 0;
+            let count = 0;
+            container.innerHTML = '';
+
+            cart.forEach((item, index) => {
+                total += item.price * item.qty;
+                count += item.qty;
+                container.innerHTML += `
+                    <div class="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div>
+                            <p class="font-bold text-slate-800">${item.name}</p>
+                            <p class="text-xs text-orange-500 font-bold">${item.price.toFixed(2)}€ cada</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="changeQty(${index}, -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-slate-200 text-slate-400 hover:text-red-500"><i class="fas fa-minus text-xs"></i></button>
+                            <span class="font-black">${item.qty}</span>
+                            <button onclick="changeQty(${index}, 1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-slate-200 text-slate-400 hover:text-green-500"><i class="fas fa-plus text-xs"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            totalDisplay.innerText = `${total.toFixed(2)}€`;
+            countDisplay.innerText = count;
+        }
+
+        function changeQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            updateCartUI();
+        }
+
+        function toggleCart() {
+            const sidebar = document.getElementById('cartSidebar');
+            const overlay = document.getElementById('cartOverlay');
+            const isClosing = sidebar.children[1].classList.contains('translate-x-0');
+
+            if (isClosing) {
+                sidebar.children[1].classList.add('translate-x-full');
+                sidebar.children[1].classList.remove('translate-x-0');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+            } else {
+                sidebar.children[1].classList.remove('translate-x-full');
+                sidebar.children[1].classList.add('translate-x-0');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                overlay.classList.add('opacity-100', 'pointer-events-auto');
+            }
+        }
+
+        // 3. Sistema de Filtros e Pesquisa
+        function filterContent() {
+            const searchTerm = document.getElementById('mainSearch').value.toLowerCase() || 
+                               document.getElementById('mobileSearch').value.toLowerCase();
+            const activeCategory = document.querySelector('.category-pill.active').dataset.category;
+
+            menuItems.forEach(card => {
+                const name = card.dataset.name.toLowerCase();
+                const category = card.dataset.category;
+                
+                const matchesSearch = name.includes(searchTerm);
+                const matchesCategory = activeCategory === 'all' || category === activeCategory;
+
+                if (matchesSearch && matchesCategory) {
+                    card.classList.remove('hidden-item');
+                } else {
+                    card.classList.add('hidden-item');
+                }
+            });
+        }
+
+        // Listeners para filtros
+        document.querySelectorAll('.category-pill').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-pill').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                filterContent();
+            });
+        });
+
+        document.getElementById('mainSearch').addEventListener('input', filterContent);
+        document.getElementById('mobileSearch').addEventListener('input', filterContent);
+
+        // 4. Verificação de Horário (Simulação baseada na imagem enviada)
+        function checkShopStatus() {
+            const now = new Date();
+            const hour = now.getHours();
+            const day = now.getDay(); // 0 = Domingo, 1 = Segunda...
+            const statusDiv = document.getElementById('shopStatus');
+            const statusText = document.getElementById('statusText');
+
+            // Horário simplificado: Aberto 10:00 - 14:30 e 17:00 - 21:15 (exceto Segunda)
+            const isLunch = (hour >= 10 && (hour < 14 || (hour === 14 && now.getMinutes() < 30)));
+            const isDinner = (hour >= 17 && (hour < 21 || (hour === 21 && now.getMinutes() < 15)));
+            const isOpen = (day !== 1) && (isLunch || isDinner);
+
+            if (isOpen) {
+                statusDiv.className = "flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700";
+                statusText.innerText = "ABERTO AGORA";
+            } else {
+                statusDiv.className = "flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700";
+                statusText.innerText = "FECHADO";
+            }
+        }
+
+        // 5. Finalização
+        function checkout() {
+            if (cart.length === 0) return;
+            
+            let message = "Olá! Gostaria de encomendar:\n\n";
+            cart.forEach(item => {
+                message += `• ${item.qty}x ${item.name}\n`;
+            });
+            message += `\nTotal: ${document.getElementById('cartTotal').innerText}`;
+            
+            // Link para WhatsApp (Simulado com o número da imagem)
+            const phone = "351219400177";
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        // Inicialização
+        window.onload = () => {
+            checkShopStatus();
+            setInterval(checkShopStatus, 60000); // Checa a cada minuto
+        };
+    </script>
+</body>
+</html>
